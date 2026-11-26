@@ -15,6 +15,13 @@ front page drawn entirely in code: **43 stories across 7 regions**, 3 large
 hero panels, 10 illustrated main stories, a full-width numbered-pin world map,
 a UTC timeline ("By the Clock"), "Day in Numbers", and a 30-item "Also on" list.
 
+Version 2 fixes the first version's known weaknesses: the COP31 hero is
+redrawn as a summit hall at dusk with a red NO DEAL banner, a negotiation
+table and wooden chairs (one knocked over, a briefcase left behind); map pins
+7 (Riyadh), 8 (Gaza) and 10 (Dakar) now sit on their coastlines; and the
+footer states plainly that only the 01:44 and 02:37 clock times were reported
+exactly, the rest being the order the stories broke.
+
 ## How it is built
 
 `main.ts` runs on Node 22 with the standard library only — no network, no

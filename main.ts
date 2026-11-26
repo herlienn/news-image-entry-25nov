@@ -1,6 +1,9 @@
 // Node 22, standard library only. Draws one 1024x1024 PNG to /output/entry.png
 // (or $MAKEFUN_OUTPUT_DIR). No network. Deterministic: two runs are byte-identical.
-// "The World in One Day" - Wednesday, 25 November 2026.
+// "The World in One Day" - Wednesday, 25 November 2026. Version 2: the COP31
+// hero is redrawn (no grey blocks), map pins 7/8/10 sit on their coastlines,
+// and the By the Clock note says which times were reported and which are in
+// publication order.
 import { deflateSync } from 'node:zlib';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -248,6 +251,9 @@ const SAND = [232, 214, 170];
 const SEA2 = [30, 80, 120];
 const GRASS = [46, 125, 62];
 const DARK = [18, 22, 30];
+const WOOD = [112, 72, 38];
+const WOOD_D = [80, 50, 26];
+const WOOD_L = [140, 96, 52];
 
 function sceneTreaty(x, y, w, h) {
   rect(x, y, w, h, SKY2);
@@ -314,33 +320,68 @@ function sceneShip(x, y, w, h) {
     line(x + 108, y + h - 66, x + 108 + Math.round(14 * Math.cos(a)), y + h - 66 + Math.round(14 * Math.sin(a)), [255, 180, 40]);
   }
 }
+// COP31, v2 redesign: a summit hall at dusk. A red NO DEAL banner over a long
+// negotiation table; wooden chairs with slats behind it, one chair knocked
+// over on the floor and a briefcase left behind (the walkout); an oil derrick
+// silhouette and a setting sun. No flat grey blocks anywhere.
 function sceneCop(x, y, w, h) {
-  rect(x, y, w, h, [238, 222, 180]);
-  circle(x + w - 36, y + 26, 18, [245, 190, 90]);
-  // cracked earth
-  rect(x, y + h - 40, w, 40, [190, 150, 100]);
-  line(x + 10, y + h - 40, x + 34, y + h - 14, [120, 85, 50]);
-  line(x + 34, y + h - 14, x + 60, y + h - 30, [120, 85, 50]);
-  line(x + w - 20, y + h - 40, x + w - 52, y + h - 10, [120, 85, 50]);
-  // oil derrick
-  line(x + 52, y + h - 40, x + 66, y + 34, [60, 50, 40]);
-  line(x + 84, y + h - 40, x + 70, y + 34, [60, 50, 40]);
-  line(x + 56, y + h - 52, x + 80, y + h - 52, [60, 50, 40]);
-  line(x + 60, y + h - 66, x + 76, y + h - 66, [60, 50, 40]);
-  line(x + 66, y + 34, x + 92, y + 52, [60, 50, 40]);
-  // empty chairs row
-  for (let i = 0; i < 5; i++) {
-    const cx = x + w - 130 + i * 24;
-    rect(cx, y + h - 62, 16, 22, [110, 110, 120]);
-    rect(cx - 2, y + h - 76, 20, 14, [140, 140, 150]);
+  // dusk sky, orange horizon band, dry ground
+  rect(x, y, w, 92, [36, 52, 96]);
+  rect(x, y + 92, w, 10, [232, 140, 70]);
+  rect(x, y + 102, w, h - 102, [150, 110, 70]);
+  // stars in the upper sky
+  for (let i = 0; i < 10; i++) px(x + 12 + ((i * 31) % (w - 24)), y + 6 + ((i * 13) % 26), [210, 215, 235]);
+  // setting sun over the horizon
+  circle(x + w - 42, y + 88, 15, [245, 180, 80]);
+  circle(x + w - 42, y + 88, 10, [250, 205, 120]);
+  // oil derrick silhouette (the blocking producers), left side
+  line(x + 26, y + 102, x + 40, y + 34, [40, 35, 30]);
+  line(x + 56, y + 102, x + 42, y + 34, [40, 35, 30]);
+  line(x + 30, y + 86, x + 52, y + 86, [40, 35, 30]);
+  line(x + 34, y + 70, x + 48, y + 70, [40, 35, 30]);
+  line(x + 40, y + 34, x + 66, y + 52, [40, 35, 30]);
+  // NO DEAL banner, red frame on white
+  rect(x + w / 2 - 74, y + 10, 148, 40, RED);
+  rect(x + w / 2 - 71, y + 13, 142, 34, WHITE);
+  drawText('NO DEAL', x + w / 2 - 61, y + 20, 3, RED);
+  drawTextCentered('CLIMATE TALKS', x + w / 2, y + 54, 1, WHITE);
+  // chairs behind the table: backrest with light slats, seat, legs
+  for (let i = 0; i < 4; i++) {
+    const cx = x + 28 + i * 62;
+    rect(cx, y + 74, 16, 4, WOOD_L);
+    rect(cx, y + 78, 16, 20, WOOD);
+    rect(cx + 4, y + 78, 2, 20, TAN);
+    rect(cx + 10, y + 78, 2, 20, TAN);
+    rect(cx, y + 98, 16, 6, WOOD_L);
+    rect(cx + 1, y + 104, 3, 6, WOOD_D);
+    rect(cx + 12, y + 104, 3, 6, WOOD_D);
   }
-  // big red X over a document
-  rect(x + w / 2 - 20, y + 18, 40, 30, WHITE);
-  hline(x + w / 2 - 15, y + 26, 30, INK);
-  hline(x + w / 2 - 15, y + 32, 30, INK);
-  hline(x + w / 2 - 15, y + 38, 30, INK);
-  line(x + w / 2 - 18, y + 20, x + w / 2 + 18, y + 46, RED);
-  line(x + w / 2 + 18, y + 20, x + w / 2 - 18, y + 46, RED);
+  // negotiation table with nameplates and papers
+  rect(x + 16, y + 108, w - 64, 8, [96, 64, 36]);
+  rect(x + 26, y + 116, 6, 12, [80, 52, 28]);
+  rect(x + w - 78, y + 116, 6, 12, [80, 52, 28]);
+  for (let i = 0; i < 4; i++) {
+    const nx = x + 40 + i * 62;
+    rect(nx, y + 101, 16, 7, WHITE);
+    hline(nx + 2, y + 104, 12, INK);
+  }
+  rect(x + w / 2 - 12, y + 101, 24, 7, WHITE);
+  hline(x + w / 2 - 9, y + 104, 18, INK);
+  // briefcase left behind on the floor (the walkout)
+  rect(x + 230, y + 124, 20, 12, [40, 26, 12]);
+  rect(x + 237, y + 119, 6, 5, [40, 26, 12]);
+  hline(x + 230, y + 130, 20, GOLD);
+  // one chair knocked over on the floor, right of the table
+  rect(x + 286, y + 102, 3, 14, WOOD_D);
+  rect(x + 298, y + 102, 3, 14, WOOD_D);
+  rect(x + 284, y + 116, 18, 8, WOOD_L);
+  rect(x + 282, y + 124, 32, 9, WOOD);
+  rect(x + 290, y + 126, 2, 5, TAN);
+  rect(x + 302, y + 126, 2, 5, TAN);
+  // cracks in the dry ground
+  line(x + 20, y + 138, x + 44, y + 128, [110, 80, 50]);
+  line(x + 44, y + 128, x + 70, y + 140, [110, 80, 50]);
+  line(x + w - 90, y + 140, x + w - 60, y + 130, [110, 80, 50]);
 }
 function sceneCyber(x, y, w, h) {
   rect(x, y, w, h, DARK);
@@ -554,11 +595,15 @@ function drawMap(x, y, w, h) {
   poly([[X(830), Y(88)], [X(895), Y(82)], [X(920), Y(98)], [X(885), Y(114)], [X(840), Y(108)]], TAN); // Australia
   poly([[X(950), Y(76)], [X(975), Y(72)], [X(985), Y(84)], [X(962), Y(92)], [X(948), Y(86)]], TAN); // New Guinea / Solomons area
 }
+// v2 pin fixes, checked against the polygons above: Riyadh was floating in
+// the sea west of Arabia (604,62 -> 644,66, central Arabia, on land); Gaza
+// was in the Mediterranean (578,52 -> 594,52, right on the Levant coast);
+// Dakar was in the Atlantic (468,74 -> 482,74, right on Senegal's coast).
 const PINS = [
   [1, 'CANBERRA', 880, 100], [2, 'HONIARA', 962, 84], [3, 'KYIV', 530, 26],
   [4, 'HELSINKI', 545, 12], [5, 'BENGHAZI', 552, 62], [6, 'ANTALYA', 560, 42],
-  [7, 'RIYADH', 604, 62], [8, 'GAZA', 578, 52], [9, 'KINSHASA', 520, 92],
-  [10, 'DAKAR', 468, 74], [11, 'SHANGHAI', 800, 46], [12, 'WASHINGTON', 152, 46],
+  [7, 'RIYADH', 644, 66], [8, 'GAZA', 594, 52], [9, 'KINSHASA', 520, 92],
+  [10, 'DAKAR', 482, 74], [11, 'SHANGHAI', 800, 46], [12, 'WASHINGTON', 152, 46],
 ];
 function drawPins(mx, my, mw, mh) {
   const sx = mw / 1024, sy = mh / 128;
@@ -621,6 +666,9 @@ const GRID = [
   { scene: sceneCourt, tag: 'EUROPE', head: 'SARKOZY TO TRIAL', deck: 'French officials order ex-president Sarkozy and wife Carla Bruni to trial in a corruption case; first hearing April 2027.' },
 ];
 
+// By the Clock: only 01:44 (Al Jazeera) and 02:37 (AP) were reported with
+// exact times. The other four times are the order the stories broke, not
+// reported clock times — the footer says so. No time is invented here.
 const CLOCK = [
   ['00:45', 'ZELENSKIY CONFIRMS SHIP STRIKES'],
   ['01:44', 'AUSTRALIA 34-10 NZ, RUGBY LEAGUE CROWN'],
@@ -753,7 +801,7 @@ function draw() {
   // footer
   hline(8, 1002, W - 16, INK);
   drawText('SOURCES: REUTERS, AP, CNN, AFP, GUARDIAN, AL JAZEERA, XINHUA, OKAYAFRICA, PINA, WHO, WAFA, DOJ, SPORTRADAR, BBC, WFP, BD GLOBAL TIMES, PANAPRESS, WASHINGTON POST', 8, 1006, 1, GREY);
-  drawText('DATE CHECK: STORIES FIRST REPORTED 24 NOV BUT HEADLINING 25 NOV PAPERS COUNT; ALL DATES UTC.', 8, 1015, 1, GREY);
+  drawText('DATE CHECK: STORIES FIRST REPORTED 24 NOV BUT HEADLINING 25 NOV PAPERS COUNT; ALL DATES UTC. CLOCK: 01:44 + 02:37 AS REPORTED; REST IN ORDER.', 8, 1015, 1, GREY);
 }
 
 function main() {
